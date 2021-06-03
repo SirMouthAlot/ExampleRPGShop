@@ -9,19 +9,24 @@ namespace ExampleRPGShop
 {
     class Program
     {
+        //Global Variables//
         public static List<ShopItem> shopItemsList = new List<ShopItem>();
-        static string input;
-        //static List<ShopItem> shopItemsList;
+        public static List<ShopItem> playerInventory = new List<ShopItem>();
 
+        static int playerGold = 500;
+        static float sellingPriceMultiplier = 0.8f;
+
+        static string input;
+        ////////////////////
+        
         static void Main(string[] args)
         {
-
-            InitShop();
+            InitShopItems();
 
             StartShop();
         }
 
-        static void InitShop()
+        static void InitShopItems()
         {
             StreamReader reader = new StreamReader("../../ShopItems.txt");
             Random random = new Random();
@@ -53,11 +58,13 @@ namespace ExampleRPGShop
         {
             Console.WriteLine("Welcome to our shop! What would you like to do? \n");
 
-            Console.WriteLine("1. Buy \n\n2. Sell \n\n3. Trade \n4. Exit \n");
+            Console.WriteLine("1. Buy \n\n2. Sell \n\n3. Trade \n\n4. Exit \n");
 
             input = Console.ReadLine();
 
             int.TryParse(input, out int choice);
+
+            Console.Clear();
 
             if (choice == 1)
                 BuySection();
@@ -66,7 +73,9 @@ namespace ExampleRPGShop
             else if (choice == 3)
                 TradeSection();
             else if (choice == 4)
-                return;
+            {
+
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -75,14 +84,92 @@ namespace ExampleRPGShop
 
         }
 
-        static void BuySection()
+        static void SellSection()
         {
-            Console.WriteLine("What would you like to buy? \n");
-            Console.WriteLine("1. Weapons \n\n2. Armour \n\n3. Consumables \n");
+            if (playerInventory.Count == 0)
+            {
+                Console.WriteLine("You do not have any items to sell. \n");
+                StartShop();
+            }
+
+            Console.WriteLine("What would you like to Sell? \n");
+
+            for (int i = 0; i < playerInventory.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {playerInventory[i].GetName()} \nSelling Price: {(int)(playerInventory[i].GetValue() * sellingPriceMultiplier)} Gold \n");
+            }
+
+            Console.WriteLine($"{playerInventory.Count + 1}. Cancel \n");
 
             input = Console.ReadLine();
 
             int.TryParse(input, out int choice);
+
+            Console.Clear();
+
+            if (choice <= playerInventory.Count)
+            {
+                Console.WriteLine($"Would you like to sell {playerInventory[choice - 1].GetName()} for {(int)(playerInventory[choice - 1].GetValue() * sellingPriceMultiplier)} Gold? \n" +
+                                   "1. Yes \n\n2. No\n");
+
+                input = Console.ReadLine();
+
+                int.TryParse(input, out int confirm);
+
+                Console.Clear();
+
+                if (confirm == 1)
+                {
+                    Console.WriteLine("Thank you! here is your payment\n");
+                    Console.WriteLine($"Player received {(int)(playerInventory[choice - 1].GetValue() * sellingPriceMultiplier)} Gold for their {playerInventory[choice - 1].GetName()} \n");
+
+                    for (int i = 0; i < playerInventory.Count; i++)
+                    {
+                        if (playerInventory[i] == playerInventory[choice - 1])
+                        {
+                            shopItemsList.Add(playerInventory[choice - 1]);
+                            playerGold += (int)(playerInventory[choice - 1].GetValue() * sellingPriceMultiplier);
+                            playerInventory.RemoveAt(i);
+                        }
+                    }
+                }
+                else if (confirm == 2)
+                {
+                    SellSection();
+                }
+                else
+                {
+                    Console.WriteLine("That is not a valid option.\n");
+                    SellSection();
+                }
+            }
+            else if (choice == playerInventory.Count + 1)
+                StartShop();
+            else
+            {
+                Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
+                SellSection();
+            }
+
+            StartShop();
+        }
+        static void TradeSection()
+        {
+            Console.WriteLine("These are your trading options");
+            StartShop();
+        }
+
+        #region BUY FUNCTIONS
+        static void BuySection()
+        {
+            Console.WriteLine($"You have {playerGold} gold \nWhat would you like to buy? \n");
+            Console.WriteLine("1. Weapons \n\n2. Armour \n\n3. Consumables \n\n4. Cancel");
+
+            input = Console.ReadLine();
+
+            int.TryParse(input, out int choice);
+
+            Console.Clear();
 
             if (choice == 1)
                 BuyWeapon();
@@ -90,22 +177,14 @@ namespace ExampleRPGShop
                 BuyArmour();
             else if (choice == 3)
                 BuyConsumables();
+            else if (choice == 4)
+                StartShop();
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
                 BuySection();
             }
 
-            StartShop();
-        }
-        static void SellSection()
-        {
-            Console.WriteLine("What would you like to Sell? \n");
-            StartShop();
-        }
-        static void TradeSection()
-        {
-            Console.WriteLine("These are your trading options");
             StartShop();
         }
 
@@ -119,7 +198,7 @@ namespace ExampleRPGShop
                     weaponsList.Add(shopItemsList[i]);
             }
 
-            Console.WriteLine("Which weapon would you like to buy: \n");
+            Console.WriteLine($"Gold: {playerGold} \nWhich weapon would you like to buy: \n");
 
             for (int i = 0; i < weaponsList.Count; i++)
             {
@@ -132,8 +211,16 @@ namespace ExampleRPGShop
 
             int.TryParse(input, out int choice);
 
+            Console.Clear();
+
             if (choice <= weaponsList.Count)
             {
+                if (playerGold < weaponsList[choice - 1].GetValue())
+                {
+                    Console.WriteLine("You do not have enough gold, pick a different option\n");
+                    BuyWeapon();
+                }
+
                 Console.WriteLine($"Would you like to buy {weaponsList[choice - 1].GetName()} for {weaponsList[choice - 1].GetValue()} Gold? \n" +
                                    "1. Yes \n\n2. No\n");
 
@@ -141,14 +228,18 @@ namespace ExampleRPGShop
 
                 int.TryParse(input, out int confirm);
 
+                Console.Clear();
+
                 if (confirm == 1)
                 {
-                    Console.WriteLine("Here is your new weapon. You will not get it in your inventory yet because i havent coded that part yet\n");
+                    Console.WriteLine("You have recieved your new weapon\n");
 
                     for (int i = 0; i < shopItemsList.Count; i++)
                     {
                         if (shopItemsList[i] == weaponsList[choice - 1])
                         {
+                            playerInventory.Add(weaponsList[choice - 1]);
+                            playerGold -= weaponsList[choice - 1].GetValue();
                             shopItemsList.RemoveAt(i);
                         }
                     }
@@ -183,7 +274,7 @@ namespace ExampleRPGShop
                     armourList.Add(shopItemsList[i]);
             }
 
-            Console.WriteLine("Which item would you like to buy: \n");
+            Console.WriteLine($"Gold: {playerGold} \nWhich item would you like to buy: \n");
 
             for (int i = 0; i < armourList.Count; i++)
             {
@@ -196,6 +287,8 @@ namespace ExampleRPGShop
 
             int.TryParse(input, out int choice);
 
+            Console.Clear();
+
             if (choice <= armourList.Count)
             {
                 Console.WriteLine($"Would you like to buy {armourList[choice - 1].GetName()} for {armourList[choice - 1].GetValue()} Gold? \n" +
@@ -205,14 +298,18 @@ namespace ExampleRPGShop
 
                 int.TryParse(input, out int confirm);
 
+                Console.Clear();
+
                 if (confirm == 1)
                 {
-                    Console.WriteLine("Here is your armour. You will not get it in your inventory yet because i havent coded that part yet\n");
+                    Console.WriteLine("You have received your armour\n");
 
                     for (int i = 0; i < shopItemsList.Count; i++)
                     {
                         if (shopItemsList[i] == armourList[choice - 1])
                         {
+                            playerInventory.Add(armourList[choice - 1]);
+                            playerGold -= armourList[choice - 1].GetValue();
                             shopItemsList.RemoveAt(i);
                         }
                     }
@@ -246,7 +343,7 @@ namespace ExampleRPGShop
                     consumablesList.Add(shopItemsList[i]);
             }
 
-            Console.WriteLine("Which item would you like to buy: \n");
+            Console.WriteLine($"Gold: {playerGold} \nWhich item would you like to buy: \n");
 
             for (int i = 0; i < consumablesList.Count; i++)
             {
@@ -259,6 +356,8 @@ namespace ExampleRPGShop
 
             int.TryParse(input, out int choice);
 
+            Console.Clear();
+
             if (choice <= consumablesList.Count)
             {
                 Console.WriteLine($"Would you like to buy {consumablesList[choice - 1].GetName()} for {consumablesList[choice - 1].GetValue()} Gold? \n" +
@@ -268,14 +367,18 @@ namespace ExampleRPGShop
 
                 int.TryParse(input, out int confirm);
 
+                Console.Clear();
+
                 if (confirm == 1)
                 {
-                    Console.WriteLine("Here is your item. You will not get it in your inventory because i havent coded that part yet\n");
+                    Console.WriteLine("You have received your new item\n");
 
                     for (int i = 0; i < shopItemsList.Count; i++)
                     {
                         if (shopItemsList[i] == consumablesList[choice - 1])
                         {
+                            playerInventory.Add(consumablesList[choice - 1]);
+                            playerGold -= consumablesList[choice - 1].GetValue();
                             shopItemsList.RemoveAt(i);
                         }
                     }
@@ -298,5 +401,6 @@ namespace ExampleRPGShop
                 BuyConsumables();
             }
         }
+        #endregion
     }
 }
