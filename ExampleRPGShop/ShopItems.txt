@@ -1,0 +1,1 @@
+Shortsword:0,Longsword:0,Iron Helm:1,Small HP Potion:2,SpellCasting Staff:0,Iron Plated Shield:1,Leather Boots:1
