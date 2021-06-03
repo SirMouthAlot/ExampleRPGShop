@@ -291,6 +291,12 @@ namespace ExampleRPGShop
 
             if (choice <= armourList.Count)
             {
+                if (playerGold < armourList[choice - 1].GetValue())
+                {
+                    Console.WriteLine("You do not have enough gold, pick a different option\n");
+                    BuyArmour();
+                }
+
                 Console.WriteLine($"Would you like to buy {armourList[choice - 1].GetName()} for {armourList[choice - 1].GetValue()} Gold? \n" +
                                    "1. Yes \n\n2. No\n");
 
@@ -360,6 +366,12 @@ namespace ExampleRPGShop
 
             if (choice <= consumablesList.Count)
             {
+                if (playerGold < consumablesList[choice - 1].GetValue())
+                {
+                    Console.WriteLine("You do not have enough gold, pick a different option\n");
+                    BuyConsumables();
+                }
+
                 Console.WriteLine($"Would you like to buy {consumablesList[choice - 1].GetName()} for {consumablesList[choice - 1].GetValue()} Gold? \n" +
                                    "1. Yes \n\n2. No\n");
 
