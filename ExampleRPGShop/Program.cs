@@ -74,7 +74,7 @@ namespace ExampleRPGShop
                 TradeSection();
             else if (choice == 4)
             {
-
+                Environment.Exit(0);
             }
             else
             {
@@ -155,7 +155,101 @@ namespace ExampleRPGShop
         }
         static void TradeSection()
         {
-            Console.WriteLine("These are your trading options");
+            List<ShopItem> tradeList = new List<ShopItem>();
+            int count = 1;
+
+            if (playerInventory.Count == 0)
+            {
+                Console.WriteLine("You do not have any items to trade. \n");
+                StartShop();
+            }
+
+            Console.WriteLine("These are your trading options, these options are made based on similarly valued items.");
+
+            for (int i = 0; i < playerInventory.Count; i++)
+            {
+                for (int j = 0; j < shopItemsList.Count; j++)
+                {
+                    if (Math.Abs(playerInventory[i].GetValue() - shopItemsList[j].GetValue()) <= 50)
+                    {
+                        tradeList.Add(playerInventory[i]);
+                        tradeList.Add(shopItemsList[j]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < tradeList.Count; i += 2)
+            {
+                Console.WriteLine($"{count}. {tradeList[i].GetName()} for {tradeList[i + 1].GetName()} \n");
+                count++;
+            }
+
+            Console.WriteLine($"{count}. Cancel");
+
+            input = Console.ReadLine();
+
+            int.TryParse(input, out int choice);
+
+            Console.Clear();
+
+            if (choice < count)
+            {
+                Console.WriteLine($"Please confirm this trade: \n" +
+                                   "1. Yes \n\n2. No\n");
+
+                input = Console.ReadLine();
+
+                int.TryParse(input, out int confirm);
+
+                Console.Clear();
+
+                if (confirm == 1)
+                {
+                    Console.WriteLine("The trade has been completed you have received your new item\n");
+
+
+                    List<ShopItem> swapItems = new List<ShopItem>();
+
+                    int itemIndex = (choice - 1) * 2;
+
+                    swapItems.Add(tradeList[itemIndex]);
+                    swapItems.Add(tradeList[itemIndex + 1]);
+                    for (int i = 0; i < playerInventory.Count; i++)
+                    {
+                        if (playerInventory[i] == swapItems[0])
+                        {
+                            shopItemsList.Add(swapItems[0]);
+                            playerInventory.RemoveAt(i);
+                        }
+                    }
+
+                    for (int i = 0; i < shopItemsList.Count; i++)
+                    {
+                        if (shopItemsList[i] == swapItems[1])
+                        {
+                            playerInventory.Add(swapItems[1]);
+                            shopItemsList.RemoveAt(i);
+                        }
+                    }
+                }
+                else if (confirm == 2)
+                {
+                    TradeSection();
+                }
+                else
+                {
+                    Console.WriteLine("That is not a valid option.\n");
+                    TradeSection();
+                }
+            }
+            else if (choice == count)
+                StartShop();
+            else
+            {
+                Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
+                TradeSection();
+            }
+
             StartShop();
         }
 
