@@ -1,0 +1,1 @@
+Shortsword:0:5000,Iron Helm:1:400,Longsword:0:34,Iron Plated Shield:1:27,Small HP Potion:2:68

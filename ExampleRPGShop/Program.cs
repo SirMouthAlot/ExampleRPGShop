@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace ExampleRPGShop
@@ -21,12 +18,63 @@ namespace ExampleRPGShop
         
         static void Main(string[] args)
         {
-            InitShopItems();
+            InputPlayerInventory();
+            InputShopItems();
 
             StartShop();
         }
 
-        static void InitShopItems()
+        static void InputPlayerInventory()
+        {
+            StreamReader reader = new StreamReader("../../PlayerInventory.txt");
+
+            //Reads the first line from text
+            string data = reader.ReadLine();
+
+            //Continues reading lines until it reaches the end of the file
+            while (data != null)
+            {
+                //Splits a string into an array of strings using ',' as the delimiter
+                string[] playerInventorySplitAr = data.Split(',');
+
+                //for every string in the aplit array, it splits that string into a name and a type
+                for (int i = 0; i < playerInventorySplitAr.Length; i++)
+                {
+                    string[] itemAr = playerInventorySplitAr[i].Split(':');
+                    int type = int.Parse(itemAr[1]);
+                    string name = itemAr[0];
+                    int price = int.Parse(itemAr[2]);
+
+                    playerInventory.Add(new ShopItem(name, price, type));
+                }
+
+                data = reader.ReadLine();
+            }
+
+            reader.Close();
+        }
+
+        static void OutputPlayerInventory()
+        {
+            StreamWriter writer = new StreamWriter("../../PlayerInventory.txt");
+
+            //Loop through player inventory
+            for (int i = 0; i < playerInventory.Count; i++)
+            {
+                //write comma if it isn't before the first item
+                if (i != 0)
+                {
+                    writer.Write(",");
+                }
+
+                //writes the shop item values out
+                writer.Write($"{playerInventory[i].GetName()}:{(int)playerInventory[i].GetType()}:{playerInventory[i].GetValue()}");
+            }
+
+            writer.Close();
+        }
+
+        static void InputShopItems()
         {
             StreamReader reader = new StreamReader("../../ShopItems.txt");
             Random random = new Random();
@@ -52,13 +100,15 @@ namespace ExampleRPGShop
 
                 data = reader.ReadLine();
             }
+
+            reader.Close();
         }
 
         static void StartShop()
         {
             Console.WriteLine("Welcome to our shop! What would you like to do? \n");
 
-            Console.WriteLine("1. Buy \n\n2. Sell \n\n3. Trade \n\n4. Exit \n");
+            Console.WriteLine("1. Buy \n\n2. List \n\n3. Sell \n\n4. Trade \n\n5. Exit \n");
 
             input = Console.ReadLine();
 
@@ -67,13 +117,24 @@ namespace ExampleRPGShop
             Console.Clear();
 
             if (choice == 1)
+            {
                 BuySection();
+            }
             else if (choice == 2)
-                SellSection();
+            {
+                ListSection();
+            }
             else if (choice == 3)
-                TradeSection();
+            {
+                SellSection();
+            }
             else if (choice == 4)
             {
+                TradeSection();
+            }
+            else if (choice == 5)
+            {
+                OutputPlayerInventory();
                 Environment.Exit(0);
             }
             else
@@ -144,7 +205,9 @@ namespace ExampleRPGShop
                 }
             }
             else if (choice == playerInventory.Count + 1)
+            {
                 StartShop();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -153,6 +216,43 @@ namespace ExampleRPGShop
 
             StartShop();
         }
+
+        static void ListSection()
+        {
+            if (playerInventory.Count == 0)
+            {
+                Console.WriteLine("You do not have any items to list. \n");
+                StartShop();
+            }
+
+            Console.WriteLine("Here are your items! \n");
+
+            for (int i = 0; i < playerInventory.Count; i++)
+            {
+                Console.WriteLine($"{playerInventory[i].GetName()} \nItem Value: {(int)(playerInventory[i].GetValue())} Gold \n");
+            }
+
+            Console.WriteLine($"{1}. Back to Shop \n");
+
+            input = Console.ReadLine();
+
+            int.TryParse(input, out int choice);
+
+            Console.Clear();
+
+            if (choice == 1)
+            {
+                StartShop();
+            }
+            else
+            {
+                Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
+                ListSection();
+            }
+
+            StartShop();
+        }
+
         static void TradeSection()
         {
             List<ShopItem> tradeList = new List<ShopItem>();
@@ -243,7 +343,9 @@ namespace ExampleRPGShop
                 }
             }
             else if (choice == count)
+            {
                 StartShop();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -257,7 +359,7 @@ namespace ExampleRPGShop
         static void BuySection()
         {
             Console.WriteLine($"You have {playerGold} gold \nWhat would you like to buy? \n");
-            Console.WriteLine("1. Weapons \n\n2. Armour \n\n3. Consumables \n\n4. Cancel");
+            Console.WriteLine("1. Weapons \n\n2. Armour \n\n3. Consumables \n\n4. Cancel\n");
 
             input = Console.ReadLine();
 
@@ -266,13 +368,21 @@ namespace ExampleRPGShop
             Console.Clear();
 
             if (choice == 1)
+            {
                 BuyWeapon();
+            }
             else if (choice == 2)
+            {
                 BuyArmour();
+            }
             else if (choice == 3)
+            {
                 BuyConsumables();
+            }
             else if (choice == 4)
+            {
                 StartShop();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -349,7 +459,9 @@ namespace ExampleRPGShop
                 }
             }
             else if (choice == weaponsList.Count + 1)
+            {
                 BuySection();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -425,7 +537,9 @@ namespace ExampleRPGShop
                 }
             }
             else if (choice == armourList.Count + 1)
+            {
                 BuySection();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
@@ -500,7 +614,9 @@ namespace ExampleRPGShop
                 }
             }
             else if (choice == consumablesList.Count + 1)
+            {
                 BuySection();
+            }
             else
             {
                 Console.WriteLine("That is not a valid option, Please choose a valid option. \n");
